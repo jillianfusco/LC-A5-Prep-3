@@ -6,14 +6,22 @@
 
 /** GLOBAL VARIABLES **/
 // TODO: initialize three empty arrays (see Part A, 2)
+categories = [];
+allDrinks = [];
+currentDrinks = [];
 
 let colorClasses = {
+    "alcoholic": "alcohol",
+    "non alcoholic": "no-alcohol",
+    "optional alcohol": "optional"
+
     // TODO: add properties relating drink type with CSS class (see Part B, 6)
 }
 
 /** WINDOW LOAD LISTENER **/
 window.addEventListener("load", function() {
-    // TODO: call fetch function for drinks (see Part A, 3)
+
+    fetchDrinks(); 
     // Note: init() should be called at the end of fetchCategories() to make sure fetched data has returned from the API before the page is rendered. Each fetch function is chained to another this way.
 });
 
@@ -25,28 +33,48 @@ function init() {
     // FORM
     // TODO: Add searchArea object (see Part D, 2a)
     // TODO: Add keywordInput, categoryInput, submitButton, and resetButton (see Part B, 1a)
-
+    const keywordInput = document.getElementById("keyword-input");
+    const categoryInput = document.getElementById("category-input");
+    const submitButton = document.getElementById("submit-button");
+    const resetButton = document.getElementById("reset-button");
     // BELOW FORM
     // TODO: Add resultsArea object (see Part D, 2a)
     // TODO: Add searchResults, noResults, and noResultsText (see Part B, 1b)
+    const searchResults = document.getElementById("search-results");
+    const noResults = document.getElementById("no-results");
+    const noResultsText = document.getElementById("no-results-text");
+
     // TODO: Add emptyGlass object (see Part D, 2a)
 
     /** POPULATE DROPDOWN INPUT WITH FETCHED DATA **/
     // TODO: Set innerHTML of dropdown box (see Part B, 2)
-
+    categoryInput.innerHTML = setCategoryOptions();
     // TODO: Copy in initial triggers for animations (see Part D, 2c)
 
     /** LISTEN FOR EVENTS **/
     submitButton.addEventListener("click", () => {    
         // TODO: Add typeInput object to get the clicked radio button (see Part B, 3a)
+        let typeInput = document.querySelector("input[name=type-input]:checked")
         // TODO: Validate the type and keyword inputs (see Part B, 5)
+        if (typeInput === null) {
+            alert("Please select alcoholic, non-alcoholic, or both.");
+        } else if (keywordInput.value !== "" && !keywordInput.value.trim().match(/^[A-Za-z0-9\-]+$/)) {
+            alert("Please enter a single keyword with only letters, numbers, or hypens.")
+        } else {
+        handleSubmitClick(typeInput.value);
+        }
         // TODO: Call the handler function (see Part B, 3c)
+        
         // TODO: Prevent the default page reload (see Part B, 3d)
+        event.preventDefault();
     });
 
     resetButton.addEventListener("click", () => {
         // TODO: Change the value of noResultsText and call the handler for the reset button depending on the value of currentDrinks (see Part B, 4b) 
         // TODO: Add spinGlass("click") to the condition that currentDrinks is empty (see Part D, 2d)
+        handleResetClick();
+        
+       
     });
 
     // TODO: Add listener for empty glass image (see Part D, 2e)
@@ -55,11 +83,16 @@ function init() {
     function handleSubmitClick(type) {       
         // TODO: Call the resetResultsArea() function (see Part D, 2f)
         // TODO: Give currentDrinks all of the objects from allDrinks (see Part B, 3b-1)
-        // TODO: Call filterDrinks and pass in the three input values (see Part B, 3b-2)     
+        currentDrinks = allDrinks.slice();
+        // TODO: Call filterDrinks and pass in the three input values (see Part B, 3b-2)   
+        filterDrinks(type, categoryInput.value, keywordInput.value);
+        
         if (currentDrinks.length > 0) {
             // TODO: alphabetize results by name of drink - see sort function at bottom (see Part B, 3b-3)
-            
+            sortByName(currentDrinks, 0, currentDrinks.length -1);
             // Update values
+            searchResults.innerHTML = setRecipeCards();
+            noResults.style.display = "none";
             // TODO: add the recipe cards to the innerHTML of searchResults
             // TODO: change the value of 'display' for noResults to hide it
             
@@ -67,6 +100,7 @@ function init() {
             // TODO: Add setTimeout function with fadeInResultsArea() (see Part D, 2f)
         } else {
             // Update values
+            noResultsText.innerHTML = "No results found. Try again!";
             // TODO: Change the value of the innerHTML for noResultsText (see Part B, 3b-3)
             // Trigger animations
             // TODO: Call handleResetClick() (see Part D, 2f)         
@@ -75,6 +109,10 @@ function init() {
     function handleResetClick() { 
         // Update values
         // TODO: Reset currentDrinks, searchResults, and noResults (see Part B, 4a, 2-4) 
+        currentDrinks = [];
+        searchResults.style.display = "none";
+        noResultsText.innerHTML = "Ready for a new search?";
+        noResults.style.display = "block";
         // Trigger animations
         // TODO: Call three functions (see Part D, 2g)
     };
